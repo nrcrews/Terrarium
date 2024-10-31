@@ -12,7 +12,6 @@ from openai.types.beta.threads.runs import (
     CodeInterpreterToolCall,
     FileSearchToolCall,
 )
-from .tools import Tools
 from .config import AgentConfiguration, RunConfiguration
 
 Log = logging.getLogger("Agent")
@@ -66,12 +65,19 @@ class Agent:
     ):
         self.client = client
         self.agent_config = config
+        self.tools: list[dict] = []
         if not thread_id:
             thread = self.client.beta.threads.create()
             self.thread_id = thread.id
         else:
             self.thread_id = thread_id
 
+    def register_tool(self, tool: dict):
+        self.tools.append(tool)
+    
+    def remove_tool(self, tool: dict):
+        self.tools.remove(tool)
+    
     def add_message(self, content: dict):
         self.client.beta.threads.messages.create(
             thread_id=self.thread_id, role="user", content=content
@@ -94,7 +100,7 @@ class Agent:
             additional_instructions=config.instructions,
             parallel_tool_calls=config.parallel_tool_calls,
             event_handler=assistant_handler,
-            tools=self.agent_config.tools.list,
+            tools=self.tools,
             thread_id=self.thread_id,
         ) as stream:
             stream.until_done()

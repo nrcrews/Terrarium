@@ -1,6 +1,6 @@
 from pydantic import BaseModel
+from typing import Optional
 from enum import Enum
-from .tools import Tools
 
 __all__ = ["AIModel", "AgentConfiguration", "RunConfiguration"]
 
@@ -39,7 +39,6 @@ class AgentConfiguration(BaseModel):
     """
     The temperature.
     """
-    tools: Tools
 
 
 class RunConfiguration(BaseModel):
@@ -47,9 +46,9 @@ class RunConfiguration(BaseModel):
     Configuration for the run.
     """
 
-    instructions: str
+    instructions: Optional[str]
     """
-    The agent configuration.
+    The agent configuration. Optional.
     """
 
     parallel_tool_calls: bool

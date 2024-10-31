@@ -41,6 +41,9 @@ class AgentEventHandler:
 
     def on_error(self, error: Exception):
         pass
+    
+    def on_text_started(self):
+        pass
 
     def on_text_changed(self, delta: str):
         pass
@@ -152,7 +155,7 @@ class EventHandler(AssistantEventHandler):
 
     @override
     def on_end(self):
-        if self.run_step.status == "in_progress" and len(self.tool_calls) > 0:
+        if self.run_step and self.run_step.status == "in_progress" and len(self.tool_calls) > 0:
             tcs = [
                 AgentToolCall(
                     id=tool_call.id,
@@ -221,6 +224,11 @@ class EventHandler(AssistantEventHandler):
         return super().on_tool_call_done(tool_call)
 
     # Mark: - Text Events
+    
+    @override
+    def on_text_created(self, text: Text) -> None:
+        self.handler.on_text_started()
+        return super().on_text_created(text)
 
     @override
     def on_text_delta(self, delta: TextDelta, snapshot: Text) -> None:

@@ -1,8 +1,9 @@
 import os, json
 from openai import OpenAI
+from typing import override
 from .utils import announce, prompt_list, prompt_confirm, prompt_string
 from src.agent.config import AgentConfiguration, RunConfiguration
-from src.conductor import Conductor
+from src.conductor import Conductor, StreamHandler
 
 __all__ = ["main"]
 
@@ -27,7 +28,7 @@ def main():
         config_file = "./resources/agent_config.json"
         agent_config = AgentConfiguration(**json.load(open(config_file)))
 
-    conductor = Conductor(client=client, config=agent_config)
+    conductor = Conductor(client=client, config=agent_config, stream_handler=Handler())
 
     custom_run_config = prompt_confirm(
         "Would you like to use a custom run configuration?", default=False
@@ -86,3 +87,18 @@ def main():
             )
         elif action == "Exit":
             break
+
+
+class Handler(StreamHandler):
+
+    @override
+    def on_text_started(self):
+        print("\n🤖 Agent: ", end="")
+
+    @override
+    def on_text_changed(self, delta: str):
+        announce(delta, end="", flush=True)
+
+    @override
+    def on_text_done(self, text: str):
+        print("\n")

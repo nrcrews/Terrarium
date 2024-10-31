@@ -5,4 +5,4 @@ load_dotenv()
 import os
 import logging
 
-logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"))
+logging.basicConfig(level=os.getenv("LOG_LEVEL"))

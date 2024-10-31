@@ -7,15 +7,30 @@ from .agent.config import AgentConfiguration, RunConfiguration
 
 Log = logging.getLogger("Conductor")
 
-__all__ = ["Conductor"]
+__all__ = ["Conductor", "StreamHandler"]
+
+
+class StreamHandler:
+    
+    def on_text_started(self):
+        pass
+
+    def on_text_changed(self, delta: str):
+        pass
+    
+    def on_text_done(self, text: str):
+        pass
 
 
 class Conductor:
 
-    def __init__(self, client: OpenAI, config: AgentConfiguration):
+    def __init__(
+        self, client: OpenAI, config: AgentConfiguration, stream_handler: StreamHandler
+    ):
         self.client = client
         self.agent = Agent(client=client, config=config)
         self.registry = Registry()
+        self.stream_handler = stream_handler
 
     def add_message(self, text: str = None, image_file: str = None):
         content = []
@@ -31,9 +46,14 @@ class Conductor:
         self.agent.add_message(content=content)
 
     def run(
-        self, config: RunConfiguration = RunConfiguration(instructions=None, parallel_tool_calls=True)
+        self,
+        config: RunConfiguration = RunConfiguration(
+            instructions=None, parallel_tool_calls=True
+        ),
     ):
-        event_handler = AgentHandler(agent=self.agent, registry=self.registry)
+        event_handler = AgentHandler(
+            agent=self.agent, registry=self.registry, stream_handler=self.stream_handler
+        )
 
         try:
             self.agent.run(
@@ -47,9 +67,10 @@ class Conductor:
 
 class AgentHandler(AgentEventHandler):
 
-    def __init__(self, agent: Agent, registry: Registry):
+    def __init__(self, agent: Agent, registry: Registry, stream_handler: StreamHandler):
         self.agent = agent
         self.registry = registry
+        self.stream_handler = stream_handler
 
     @override
     def on_tool_calls(self, tool_calls: list[AgentToolCall]):
@@ -77,7 +98,18 @@ class AgentHandler(AgentEventHandler):
     @override
     def on_error(self, error: Exception):
         return super().on_error(error)
-    
+
+    @override
+    def on_text_started(self):
+        self.stream_handler.on_text_started()
+        return super().on_text_started()
+
     @override
     def on_text_changed(self, delta: str):
+        self.stream_handler.on_text_changed(delta)
         return super().on_text_changed(delta)
+
+    @override
+    def on_text_done(self, text: str):
+        self.stream_handler.on_text_done(text)
+        return super().on_text_done(text)

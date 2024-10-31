@@ -1,6 +1,6 @@
 import logging
 from .tools import Tool
-from .tools.prompt_user import PromptUserInput
+from .tools.current_date_time import CurrentDateTime
 
 __all__ = ["Registry"]
 
@@ -10,8 +10,8 @@ Log = logging.getLogger("Registry")
 class Registry:
 
     def __init__(self):
-        self.tools: dict[str, Tool] = {"prompt_user_input": PromptUserInput()}
         self.registered_tools: dict[str, Tool] = {}
+        self.tools: dict[str, Tool] = {"get_current_date_time": CurrentDateTime()}
 
     @property
     def available_tools(self) -> list[str]:

@@ -3,12 +3,12 @@ from InquirerPy import prompt
 __all__ = ["prompt_confirm", "prompt_string", "prompt_list", "announce", "num_tokens"]
 
 
-def announce(message, prefix: str = ""):
+def announce(message, prefix: str = "", end: str = "\n", flush: bool = False):
     # Function to print a colored message
 
     cyan = "\033[96m"
     default = "\033[0m"
-    print("{0}{1}{2}{3}".format(prefix, cyan, message, default))
+    print("{0}{1}{2}{3}".format(prefix, cyan, message, default), end=end, flush=flush)
 
 
 def prompt_confirm(question_message, default=True):

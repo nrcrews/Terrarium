@@ -78,7 +78,7 @@ class Agent:
     def remove_tool(self, tool: dict):
         self.tools.remove(tool)
     
-    def add_message(self, content: dict):
+    def add_message(self, content: list[dict]):
         self.client.beta.threads.messages.create(
             thread_id=self.thread_id, role="user", content=content
         )

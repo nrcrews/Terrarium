@@ -9,11 +9,26 @@ Log = logging.getLogger("Conductor")
 
 __all__ = ["Conductor"]
 
+
 class Conductor:
 
     def __init__(self, client: OpenAI, config: AgentConfiguration):
+        self.client = client
         self.agent = Agent(client=client, config=config)
         self.registry = Registry()
+
+    def add_message(self, text: str = None, image_file: str = None):
+        content = []
+        if text:
+            content.append({"type": "text", "text": text})
+        if image_file:
+            upl_file = self.client.files.create(
+                file=open(image_file, "rb"), purpose="assistants"
+            )
+            content.append(
+                {"type": "image_file", "image_file": {"file_id": upl_file.id}}
+            )
+        self.agent.add_message(content=content)
 
     def run(
         self, config: RunConfiguration = RunConfiguration(parallel_tool_calls=True)

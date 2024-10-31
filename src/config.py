@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from enum import Enum
+from .tools import Tools
 
 __all__ = ["AIModel", "AgentConfiguration", "RunConfiguration"]
 
@@ -38,6 +39,7 @@ class AgentConfiguration(BaseModel):
     """
     The temperature.
     """
+    tools: Tools
 
 
 class RunConfiguration(BaseModel):

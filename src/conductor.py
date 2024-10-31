@@ -31,12 +31,16 @@ class Conductor:
         self.agent.add_message(content=content)
 
     def run(
-        self, config: RunConfiguration = RunConfiguration(parallel_tool_calls=True)
+        self, config: RunConfiguration = RunConfiguration(instructions=None, parallel_tool_calls=True)
     ):
         event_handler = AgentHandler(agent=self.agent, registry=self.registry)
 
         try:
-            self.agent.run(config=config, event_handler=weakref.proxy(event_handler))
+            self.agent.run(
+                config=config,
+                tools=self.registry.agent_tools,
+                event_handler=weakref.proxy(event_handler),
+            )
         except Exception as e:
             Log.exception(e)
 
@@ -73,3 +77,7 @@ class AgentHandler(AgentEventHandler):
     @override
     def on_error(self, error: Exception):
         return super().on_error(error)
+    
+    @override
+    def on_text_changed(self, delta: str):
+        return super().on_text_changed(delta)

@@ -1,7 +1,10 @@
+import logging
 from .tools import Tool
 from .tools.prompt_user import PromptUserInput
 
 __all__ = ["Registry"]
+
+Log = logging.getLogger("Registry")
 
 
 class Registry:
@@ -10,6 +13,7 @@ class Registry:
         self.tools: dict[str, Tool] = {"prompt_user_input": PromptUserInput()}
         self.registered_tools: dict[str, Tool] = {}
 
+    @property
     def available_tools(self) -> list[str]:
         return list(self.tools.keys())
 
@@ -18,10 +22,13 @@ class Registry:
             raise Exception(f"Tool with name {name} not found.")
 
         self.registered_tools[name] = self.tools[name]
+        Log.info(f"Registered tool {name}")
 
-    def deregister_tool(self, tool: Tool):
-        del self.registered_tools[tool.name]
+    def deregister_tool(self, name: str):
+        del self.registered_tools[name]
+        Log.info(f"Deregistered tool {name}")
 
+    @property
     def agent_tools(self) -> list[dict]:
         return [
             {"type": "function", "function": tool.obj}

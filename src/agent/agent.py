@@ -65,27 +65,25 @@ class Agent:
     ):
         self.client = client
         self.agent_config = config
-        self.tools: list[dict] = []
         if not thread_id:
             thread = self.client.beta.threads.create()
             self.thread_id = thread.id
         else:
             self.thread_id = thread_id
 
-    def register_tool(self, tool: dict):
-        self.tools.append(tool)
-    
-    def remove_tool(self, tool: dict):
-        self.tools.remove(tool)
-    
     def add_message(self, content: list[dict]):
         self.client.beta.threads.messages.create(
             thread_id=self.thread_id, role="user", content=content
         )
-        Log.debug(f"[Agent] Message added > {content}")
+        Log.info(f"Message added > {content}")
 
-    def run(self, config: RunConfiguration, event_handler: AgentEventHandler):
-        Log.debug(f"[Agent] Run started > {config.instructions}")
+    def run(
+        self,
+        config: RunConfiguration,
+        tools: list[dict],
+        event_handler: AgentEventHandler,
+    ):
+        Log.info(f"Run started > {config.instructions}")
 
         event_handler.thread_id = self.thread_id
         assistant_handler = EventHandler(
@@ -93,14 +91,14 @@ class Agent:
         )
 
         with self.client.beta.threads.runs.stream(
-            assistant_id=self._assistant_id,
+            assistant_id=self.agent_config.assistant_id,
             model=self.agent_config.model,
             instructions=self.agent_config.instructions,
             temperature=self.agent_config.temperature,
             additional_instructions=config.instructions,
             parallel_tool_calls=config.parallel_tool_calls,
             event_handler=assistant_handler,
-            tools=self.tools,
+            tools=tools,
             thread_id=self.thread_id,
         ) as stream:
             stream.until_done()
@@ -111,7 +109,7 @@ class Agent:
         tool_call_outputs: list[AgentToolCallOutput],
         event_handler: AgentEventHandler,
     ):
-        Log.debug(f"[Agent] Tool call outputs > {tool_call_outputs}")
+        Log.info(f"Tool call outputs > {tool_call_outputs}")
         event_handler.thread_id = self.thread_id
         assistant_handler = EventHandler(
             client=self.client,
@@ -131,7 +129,7 @@ class Agent:
     @classmethod
     def cancel_run(cls, client: OpenAI, thread_id: str, run_id: str):
         client.beta.threads.runs.cancel(thread_id=thread_id, run_id=run_id)
-        Log.debug(f"[Agent] Run cancelled > {run_id}")
+        Log.info(f"Run cancelled > {run_id}")
 
 
 class EventHandler(AssistantEventHandler):
@@ -163,7 +161,7 @@ class EventHandler(AssistantEventHandler):
                 )
                 for tool_call in self.tool_calls
             ]
-            Log.debug(f"[Agent] Tool calls > {tcs}")
+            Log.info(f"Tool calls > {tcs}")
             self.handler.on_tool_calls(tcs)
             return super().on_end()
 
@@ -174,13 +172,13 @@ class EventHandler(AssistantEventHandler):
         if run.status == "completed":
             self.handler.on_run_done()
 
-        Log.debug(f"[Agent] Run status > {run.status}")
+        Log.info(f"Run status > {run.status}")
         return super().on_end()
 
     @override
     def on_exception(self, exception: Exception) -> None:
         """Fired whenever an exception happens during streaming"""
-        Log.exception(f"[Agent] Exception > {exception}")
+        Log.exception(f"Exception > {exception}")
         self.handler.on_error(exception)
         return super().on_exception(exception)
 
@@ -190,12 +188,12 @@ class EventHandler(AssistantEventHandler):
         self.run_step = run_step
         self.handler.run_id = run_step.run_id
         self.tool_calls: list[FunctionToolCall] = []
-        Log.debug(f"[Agent] Run step created > {run_step.id}")
+        Log.info(f"Run step created > {run_step.id}")
         return super().on_run_step_created(run_step)
 
     @override
     def on_run_step_done(self, run_step: RunStep) -> None:
-        Log.debug(f"[Agent] Run step done > {run_step.id}")
+        Log.info(f"Run step done > {run_step.id}")
         return super().on_run_step_done(run_step)
 
     # Mark - Tool events
@@ -232,5 +230,5 @@ class EventHandler(AssistantEventHandler):
     @override
     def on_text_done(self, text: Text) -> None:
         self.handler.on_text_done(text.value)
-        Log.debug("[Agent] Text: {message.content[0].text.value}\n")
+        Log.info(f"Text: {text.value}")
         return super().on_text_done(text)

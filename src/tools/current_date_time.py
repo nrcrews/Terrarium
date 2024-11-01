@@ -9,7 +9,7 @@ __all__ = ["CurrentDateTime"]
 class CurrentDateTime(Tool):
 
     @override
-    @property
+    @classmethod
     def name(self) -> str:
         return "get_current_date_time"
 
@@ -17,7 +17,7 @@ class CurrentDateTime(Tool):
     @property
     def obj(self) -> dict:
         return {
-            "name": self.name,
+            "name": CurrentDateTime.name(),
             "description": "Get the current date and time.",
             "strict": True,
             "parameters": {

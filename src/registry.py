@@ -1,6 +1,5 @@
 import logging
 from .tools import Tool
-from .tools.current_date_time import CurrentDateTime
 
 __all__ = ["Registry"]
 
@@ -11,7 +10,7 @@ class Registry:
 
     def __init__(self):
         self.registered_tools: dict[str, Tool] = {}
-        self.tools: dict[str, Tool] = {"get_current_date_time": CurrentDateTime()}
+        self.tools: dict[str, Tool] = local_tools()
 
     @property
     def available_tools(self) -> list[str]:
@@ -34,3 +33,22 @@ class Registry:
             {"type": "function", "function": tool.obj}
             for tool in self.registered_tools.values()
         ]
+
+
+from .tools.current_date_time import CurrentDateTime
+from .tools.read_file import ReadFile
+from .tools.delete_file import DeleteFile
+from .tools.write_file import WriteFile
+from .tools.move_file import MoveFile
+from .tools.list_files import ListFiles
+
+
+def local_tools() -> dict[str, Tool]:
+    return {
+        CurrentDateTime.name(): CurrentDateTime(),
+        ReadFile.name(): ReadFile(),
+        DeleteFile.name(): DeleteFile(),
+        WriteFile.name(): WriteFile(),
+        MoveFile.name(): MoveFile(),
+        ListFiles.name(): ListFiles(),
+    }

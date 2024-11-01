@@ -41,6 +41,7 @@ cp .env.example .env
 
 ```bash
 ./cli.sh
+```
 
 ## Available Tools
 
@@ -56,7 +57,7 @@ cp .env.example .env
 ### Remote
 
 **Coming soon!**
-```
+
 ## Contributing
 
 All contributions are welcome! Reach out for more information.

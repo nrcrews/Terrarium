@@ -41,6 +41,21 @@ cp .env.example .env
 
 ```bash
 ./cli.sh
+
+## Available Tools
+
+### Local
+
+* `get_current_date_time`
+* `delete_file`
+* `list_files`
+* `move_file`
+* `read_file`
+* `write_file`
+
+### Remote
+
+**Coming soon!**
 ```
 ## Contributing
 

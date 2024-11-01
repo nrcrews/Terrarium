@@ -11,7 +11,7 @@ If you don’t have Python installed, [download it here](https://www.python.org/
 2. Navigate to the project directory:
 
 ```bash
-cd terrarium
+cd Terrarium
 ```
 
 3. Create a new virtual environment:

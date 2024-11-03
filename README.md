@@ -45,6 +45,8 @@ cp .env.example .env
 
 ## Available Tools
 
+You can pick and choose what tools your agent has access to.
+
 ### Local
 
 * `get_current_date_time`

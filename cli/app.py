@@ -7,7 +7,7 @@ from src.conductor import Conductor, StreamHandler
 
 __all__ = ["main"]
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(api_key=os.getenv("AI_API_KEY"))
 
 
 def main():

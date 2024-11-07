@@ -1,3 +1,3 @@
-from .tool import Tool
+from ..tool import Tool
 
 __all__ = ["Tool"]

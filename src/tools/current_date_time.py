@@ -1,6 +1,6 @@
 from typing import override
 from datetime import datetime
-from .tool import Tool
+from ..tool import Tool
 
 
 __all__ = ["CurrentDateTime"]

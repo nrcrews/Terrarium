@@ -35,12 +35,18 @@ class Registry:
         ]
 
 
+# Local tools
+
 from .tools.current_date_time import CurrentDateTime
 from .tools.read_file import ReadFile
 from .tools.delete_file import DeleteFile
 from .tools.write_file import WriteFile
 from .tools.move_file import MoveFile
 from .tools.list_files import ListFiles
+
+# Remote tools
+
+from .tools.get_gh_commits import GetGitHubCommits
 
 
 def local_tools() -> dict[str, Tool]:
@@ -51,4 +57,5 @@ def local_tools() -> dict[str, Tool]:
         WriteFile.name(): WriteFile(),
         MoveFile.name(): MoveFile(),
         ListFiles.name(): ListFiles(),
+        GetGitHubCommits.name(): GetGitHubCommits(),
     }

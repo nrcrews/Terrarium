@@ -42,3 +42,7 @@ class RequestSigner:
                 raise ValueError("Failed to obtain access token.")
 
         return {self.header: f"{self.token_prefix}{self.token_store.access_token()}"}
+
+    def clear(self):
+        self.token_store.delete()
+        self.auth_server.shutdown_server()

@@ -22,24 +22,44 @@ class DataClient:
             headers.update(self.request_signer.sign())
 
         response = requests.get(url, headers=headers)
+
+        if response.status_code == 403 and self.request_signer:
+            self.request_signer.clear()
+            headers.update(self.request_signer.sign())
+            response = requests.get(url, headers=headers)
+
         return response.json()
 
     def post(self, data: dict) -> dict:
         headers = self.provider.headers or {}
+        url = self.provider.endpoint
 
         if self.request_signer:
             headers.update(self.request_signer.sign())
 
-        response = requests.post(self.provider.endpoint, json=data, headers=headers)
+        response = requests.post(url, json=data, headers=headers)
+
+        if response.status_code == 403 and self.request_signer:
+            self.request_signer.clear()
+            headers.update(self.request_signer.sign())
+            response = requests.get(url, headers=headers)
+
         return response.json()
 
     def put(self, data: dict) -> dict:
         headers = self.provider.headers or {}
+        url = self.provider.endpoint
 
         if self.request_signer:
             headers.update(self.request_signer.sign())
 
-        response = requests.put(self.provider.endpoint, json=data, headers=headers)
+        response = requests.put(url, json=data, headers=headers)
+
+        if response.status_code == 403 and self.request_signer:
+            self.request_signer.clear()
+            headers.update(self.request_signer.sign())
+            response = requests.get(url, headers=headers)
+
         return response.json()
 
     def delete(self, params: dict) -> dict:
@@ -51,4 +71,10 @@ class DataClient:
             headers.update(self.request_signer.sign())
 
         response = requests.delete(url, headers=headers)
+
+        if response.status_code == 403 and self.request_signer:
+            self.request_signer.clear()
+            headers.update(self.request_signer.sign())
+            response = requests.get(url, headers=headers)
+
         return response.json()

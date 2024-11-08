@@ -72,7 +72,7 @@ class AuthServer:
                 self.token_store.save(token_data)
                 access_token = token_data.get("access_token")
                 self.token_received_event.set()
-                self._shutdown_server()
+                self.shutdown_server()
                 return "Authentication successful! You may close this window."
             else:
                 return "Failed to obtain access token.", 400
@@ -125,7 +125,7 @@ class AuthServer:
     def _run_flask_server(self):
         self.app.run(port=5000, host="127.0.0.1")
 
-    def _shutdown_server():
+    def shutdown_server():
         func = request.environ.get("werkzeug.server.shutdown")
         if func:
             func()

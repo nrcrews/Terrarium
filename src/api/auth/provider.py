@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
-__all__ = ['ProviderAuthConfig']
+__all__ = ["ProviderAuthConfig"]
+
 
 class ProviderAuthConfig(BaseModel):
     id: str

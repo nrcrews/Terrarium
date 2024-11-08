@@ -25,7 +25,7 @@ class AuthServer:
         token_endpoint: str,
         scope: str,
         redirect_uri: str,
-        token_store: TokenStore
+        token_store: TokenStore,
     ):
         self.provider = provider
         self.client_id = client_id

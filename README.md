@@ -33,7 +33,7 @@ pip install -r requirements/cli.txt
 cp .env.example .env
 ```
 
-6. Add your OpenAI API key to the newly created .env file
+6. Populate the .env file variables.
 
 ## CLI Execution
 

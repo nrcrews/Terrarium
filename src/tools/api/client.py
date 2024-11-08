@@ -15,7 +15,7 @@ class DataClient:
 
     def get(self, params: dict) -> dict:
         query_params = urllib.parse.urlencode(params)
-        url = f"{self.provider.base_url}?{query_params}"
+        url = f"{self.provider.endpoint}?{query_params}"
         headers = self.provider.headers or {}
 
         if self.request_signer:
@@ -30,7 +30,7 @@ class DataClient:
         if self.request_signer:
             headers.update(self.request_signer.sign())
 
-        response = requests.post(self.provider.base_url, json=data, headers=headers)
+        response = requests.post(self.provider.endpoint, json=data, headers=headers)
         return response.json()
 
     def put(self, data: dict) -> dict:
@@ -39,12 +39,12 @@ class DataClient:
         if self.request_signer:
             headers.update(self.request_signer.sign())
 
-        response = requests.put(self.provider.base_url, json=data, headers=headers)
+        response = requests.put(self.provider.endpoint, json=data, headers=headers)
         return response.json()
 
     def delete(self, params: dict) -> dict:
         query_params = urllib.parse.urlencode(params)
-        url = f"{self.provider.base_url}?{query_params}"
+        url = f"{self.provider.endpoint}?{query_params}"
         headers = self.provider.headers or {}
 
         if self.request_signer:

@@ -13,10 +13,11 @@ os.makedirs(creds_dir, exist_ok=True)
 class TokenStore:
 
     def __init__(
-        self, provider: str, client_id: str, redirect_uri: str, token_endpoint: str
+        self, provider: str, client_id: str, client_secret: str, redirect_uri: str, token_endpoint: str
     ):
         self.provider = provider
         self.client_id = client_id
+        self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.token_endpoint = token_endpoint
         self.provider_file = os.path.join(creds_dir, f"{provider}.json")
@@ -77,6 +78,7 @@ class TokenStore:
             "grant_type": "refresh_token",
             "refresh_token": token_data["refresh_token"],
             "client_id": self.client_id,
+            "client_secret": self.client_secret,
             "redirect_uri": self.redirect_uri,
         }
 

@@ -8,6 +8,7 @@ import urllib.parse
 import requests
 from flask import Flask, request
 from .token import TokenStore
+from .provider import OAuthType
 
 
 __all__ = ["AuthServer"]
@@ -20,7 +21,9 @@ class AuthServer:
     def __init__(
         self,
         provider: str,
+        auth_type: OAuthType,
         client_id: str,
+        client_secret: str,
         authorization_endpoint: str,
         token_endpoint: str,
         scope: str,
@@ -28,7 +31,9 @@ class AuthServer:
         token_store: TokenStore,
     ):
         self.provider = provider
+        self.auth_type = auth_type
         self.client_id = client_id
+        self.client_secret = client_secret
         self.authorization_endpoint = authorization_endpoint
         self.token_endpoint = token_endpoint
         self.scope = scope
@@ -86,16 +91,28 @@ class AuthServer:
 
     def start(self, token_received_event: Event):
         self.token_received_event = token_received_event
-        code_challenge = self._generate_pkce_pair()
-        params = {
-            "client_id": self.client_id,
-            "response_type": "code",
-            "redirect_uri": self.redirect_uri,
-            "scope": self.scope,
-            "state": self.state,
-            "code_challenge": code_challenge,
-            "code_challenge_method": "S256",
-        }
+        
+        if self.auth_type == OAuthType.CLIENT_SECRET:
+            params = {
+                "client_id": self.client_id,
+                "response_type": "code",
+                "redirect_uri": self.redirect_uri,
+                "scope": self.scope,
+                "state": self.state,
+            }
+        elif self.auth_type == OAuthType.PKCE:
+            code_challenge = self._generate_pkce_pair()
+            params = {
+                "client_id": self.client_id,
+                "response_type": "code",
+                "redirect_uri": self.redirect_uri,
+                "scope": self.scope,
+                "state": self.state,
+                "code_challenge": code_challenge,
+                "code_challenge_method": "S256",
+            }
+        else:
+            raise ValueError("Invalid OAuth type.")
         auth_url = f"{self.authorization_endpoint}?{urllib.parse.urlencode(params)}"
 
         # Start the Flask server in a separate thread
@@ -116,15 +133,25 @@ class AuthServer:
             Log.error("Failed to shutdown server.")
 
     def _exchange_code_for_token(self, code: str):
-        data = {
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": self.redirect_uri,
-            "client_id": self.client_id,
-            "code_verifier": code_verifier,
-            # 'client_secret': CLIENT_SECRET,  # Do not include for public clients
-        }
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        
+        if self.auth_type == OAuthType.CLIENT_SECRET:
+            data = {
+                "code": code,
+                "redirect_uri": self.redirect_uri,
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+            }    
+        elif self.auth_type == OAuthType.PKCE:
+            data = {
+                "code": code,
+                "redirect_uri": self.redirect_uri,
+                "client_id": self.client_id,
+                "code_verifier": code_verifier,
+            }
+        else:
+            raise ValueError("Invalid OAuth type.")
+        
+        headers = {"Accept": "application/json"}
         response = requests.post(self.token_endpoint, data=data, headers=headers)
 
         if response.status_code == 200:

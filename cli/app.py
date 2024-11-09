@@ -1,4 +1,5 @@
 import os, json
+import logging
 from openai import OpenAI
 from typing import override
 from .utils import announce, prompt_list, prompt_confirm, prompt_string
@@ -9,6 +10,7 @@ __all__ = ["main"]
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+Log = logging.getLogger("CLI")
 
 def main():
     announce("Welcome to Terrarium!", prefix="🌱 ")
@@ -51,6 +53,7 @@ def main():
                 "Register Tool",
                 "Remove Tool",
                 "Update run configuration",
+                "Clear credentials",
                 "Exit",
             ],
         )
@@ -85,6 +88,12 @@ def main():
                     "Parallelize tool calls?", default=True
                 ),
             )
+        elif action == "Clear credentials":
+            app_name = os.getenv("APP_NAME")
+            d = f"~/.{app_name}"
+            os.system(f"rm -rf {d}")
+            os.makedirs(d, exist_ok=True)
+            Log.info("Credentials cleared.")
         elif action == "Exit":
             break
 

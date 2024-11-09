@@ -46,36 +46,40 @@ class AuthServer:
         self.token_received_event = None
         self.access_token = None
 
-        @self.app.route("/callback")
-        def oauth_callback():
-            global access_token
-            error = request.args.get("error")
-            if error:
-                Log.error(f"Error during OAuth authorization")
-                return (
-                    "Authentication failed. Please check the console for details.",
-                    400,
-                )
+        self.app.add_url_rule(
+            "/callback", "oauth_callback", self.oauth_callback, methods=["GET"]
+        )
+        self.app.add_url_rule('/shutdown', 'shutdown', self.shutdown_server)
 
-            received_state = request.args.get("state")
-            if received_state != self.state:
-                Log.error("State parameter mismatch. Potential CSRF attack.")
-                return "Invalid state parameter.", 400
+    def oauth_callback(self):
+        global access_token
+        error = request.args.get("error")
+        if error:
+            Log.error(f"Error during OAuth authorization")
+            return (
+                "Authentication failed. Please check the console for details.",
+                400,
+            )
 
-            code = request.args.get("code")
-            if not code:
-                Log.error("No authorization code received.")
-                return "Authorization code not found.", 400
+        received_state = request.args.get("state")
+        if received_state != self.state:
+            Log.error("State parameter mismatch. Potential CSRF attack.")
+            return "Invalid state parameter.", 400
 
-            token_data = self._exchange_code_for_token(code)
-            if token_data:
-                self.token_store.save(token_data)
-                access_token = token_data.get("access_token")
-                self.token_received_event.set()
-                self.shutdown_server()
-                return "Authentication successful! You may close this window."
-            else:
-                return "Failed to obtain access token.", 400
+        code = request.args.get("code")
+        if not code:
+            Log.error("No authorization code received.")
+            return "Authorization code not found.", 400
+
+        token_data = self._exchange_code_for_token(code)
+        if token_data:
+            self.token_store.save(token_data)
+            access_token = token_data.get("access_token")
+            self.token_received_event.set()
+            self.shutdown_server()
+            return "Authentication successful! You may close this window."
+        else:
+            return "Failed to obtain access token.", 400
 
     def _generate_pkce_pair(self):
         global code_verifier
@@ -91,7 +95,7 @@ class AuthServer:
 
     def start(self, token_received_event: Event):
         self.token_received_event = token_received_event
-        
+
         if self.auth_type == OAuthType.CLIENT_SECRET:
             params = {
                 "client_id": self.client_id,
@@ -124,23 +128,24 @@ class AuthServer:
 
     def _run_flask_server(self):
         self.app.run(port=5000, host="127.0.0.1")
-
-    def shutdown_server():
+            
+    def shutdown_server(self):
         func = request.environ.get("werkzeug.server.shutdown")
         if func:
             func()
         else:
             Log.error("Failed to shutdown server.")
+        return "Server shutting down..."
 
     def _exchange_code_for_token(self, code: str):
-        
+
         if self.auth_type == OAuthType.CLIENT_SECRET:
             data = {
                 "code": code,
                 "redirect_uri": self.redirect_uri,
                 "client_id": self.client_id,
                 "client_secret": self.client_secret,
-            }    
+            }
         elif self.auth_type == OAuthType.PKCE:
             data = {
                 "code": code,
@@ -150,7 +155,7 @@ class AuthServer:
             }
         else:
             raise ValueError("Invalid OAuth type.")
-        
+
         headers = {"Accept": "application/json"}
         response = requests.post(self.token_endpoint, data=data, headers=headers)
 

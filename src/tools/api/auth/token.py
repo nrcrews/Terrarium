@@ -21,6 +21,9 @@ class TokenStore:
         self.redirect_uri = redirect_uri
         self.token_endpoint = token_endpoint
         self.provider_file = os.path.join(creds_dir, f"{provider}.json")
+        
+        # Create path of file if it doesn't exist
+        os.makedirs(os.path.dirname(self.provider_file), exist_ok=True)
 
     def save(self, token_data: dict):
         if not token_data.get("access_token"):

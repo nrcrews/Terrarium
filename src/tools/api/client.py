@@ -1,9 +1,12 @@
+import logging
 import requests
 import urllib.parse
 from .provider import Provider
 from .auth.sign import RequestSigner
 
 __all__ = ["DataClient"]
+
+Log = logging.getLogger("DataClient")
 
 
 class DataClient:
@@ -24,9 +27,14 @@ class DataClient:
         response = requests.get(url, headers=headers)
 
         if response.status_code == 403 and self.request_signer:
+            Log.info("Token expired. Refreshing token.")
             self.request_signer.clear()
             headers.update(self.request_signer.sign())
             response = requests.get(url, headers=headers)
+
+        if not response.ok:
+            Log.error(f"Failed to get data from {self.provider.id}")
+            return
 
         return response.json()
 
@@ -40,9 +48,14 @@ class DataClient:
         response = requests.post(url, json=data, headers=headers)
 
         if response.status_code == 403 and self.request_signer:
+            Log.info("Token expired. Refreshing token.")
             self.request_signer.clear()
             headers.update(self.request_signer.sign())
             response = requests.get(url, headers=headers)
+
+        if not response.ok:
+            Log.error(f"Failed to get data from {self.provider.id}")
+            return
 
         return response.json()
 
@@ -56,9 +69,14 @@ class DataClient:
         response = requests.put(url, json=data, headers=headers)
 
         if response.status_code == 403 and self.request_signer:
+            Log.info("Token expired. Refreshing token.")
             self.request_signer.clear()
             headers.update(self.request_signer.sign())
             response = requests.get(url, headers=headers)
+
+        if not response.ok:
+            Log.error(f"Failed to get data from {self.provider.id}")
+            return
 
         return response.json()
 
@@ -73,8 +91,13 @@ class DataClient:
         response = requests.delete(url, headers=headers)
 
         if response.status_code == 403 and self.request_signer:
+            Log.info("Token expired. Refreshing token.")
             self.request_signer.clear()
             headers.update(self.request_signer.sign())
             response = requests.get(url, headers=headers)
+
+        if not response.ok:
+            Log.error(f"Failed to get data from {self.provider.id}")
+            return
 
         return response.json()

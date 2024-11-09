@@ -1,3 +1,4 @@
+import os
 from typing import override
 from ..tool import Tool
 
@@ -41,7 +42,9 @@ class WriteFile(Tool):
         path = args["path"]
         content = args["content"]
 
-        with open(path, "w") as f:
-            f.write(content)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        
+        with open(path, "w") as file:
+            file.write(content)
 
         return f"File created at {path}"

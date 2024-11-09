@@ -1,9 +1,14 @@
+import logging
 from threading import Event
 from .token import TokenStore
 from .server import AuthServer
 from .provider import ProviderAuthConfig
 
+
 __all__ = ["RequestSigner"]
+
+
+Log = logging.getLogger("RequestSigner")
 
 
 class RequestSigner:
@@ -39,10 +44,11 @@ class RequestSigner:
             access_token = self.token_store.access_token()
 
             if not access_token:
+                Log.error("Failed to obtain access token.")
                 raise ValueError("Failed to obtain access token.")
 
-        return {self.header: f"{self.token_prefix}{self.token_store.access_token()}"}
+        return {self.header: f"{self.token_prefix}{access_token}"}
 
     def clear(self):
         self.token_store.delete()
-        self.auth_server.shutdown_server()
+        Log.info(f"Token cleared for provider {self.provider}.")

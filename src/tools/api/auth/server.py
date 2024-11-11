@@ -1,3 +1,4 @@
+import sys, os
 import logging
 import base64
 import hashlib
@@ -49,7 +50,6 @@ class AuthServer:
         self.app.add_url_rule(
             "/callback", "oauth_callback", self.oauth_callback, methods=["GET"]
         )
-        self.app.add_url_rule('/shutdown', 'shutdown', self.shutdown_server)
 
     def oauth_callback(self):
         global access_token
@@ -76,7 +76,7 @@ class AuthServer:
             self.token_store.save(token_data)
             access_token = token_data.get("access_token")
             self.token_received_event.set()
-            self.shutdown_server()
+            self._shutdown_server()
             return "Authentication successful! You may close this window."
         else:
             return "Failed to obtain access token.", 400
@@ -128,14 +128,13 @@ class AuthServer:
 
     def _run_flask_server(self):
         self.app.run(port=5000, host="127.0.0.1")
-            
-    def shutdown_server(self):
+
+    def _shutdown_server(self):
         func = request.environ.get("werkzeug.server.shutdown")
         if func:
             func()
         else:
             Log.error("Failed to shutdown server.")
-        return "Server shutting down..."
 
     def _exchange_code_for_token(self, code: str):
 

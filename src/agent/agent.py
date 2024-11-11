@@ -86,7 +86,7 @@ class Agent:
         tools: list[dict],
         event_handler: AgentEventHandler,
     ):
-        Log.info(f"Run started > {config.instructions}")
+        Log.info(f"Run started with instructions > {config.instructions}")
 
         event_handler.thread_id = self.thread_id
         assistant_handler = EventHandler(

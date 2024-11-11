@@ -54,7 +54,7 @@ class GetGitHubCommits(Tool):
                 authorization_endpoint="https://github.com/login/oauth/authorize",
                 token_endpoint="https://github.com/login/oauth/access_token",
                 scope="repo",
-                redirect_uri="http://127.0.0.1:5000/callback",
+                redirect_uri="http://127.0.0.1:5000/github/callback",
                 header="Authorization",
                 token_prefix="Bearer ",
             ),

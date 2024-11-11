@@ -161,5 +161,7 @@ class AuthServer:
         Log.info("Browser opened for OAuth authorization.")
 
 
+# Start the server
+Log.info("Starting OAuth server.")
 active_server = AuthServer()
 Thread(target=active_server.start, daemon=True).start()

@@ -5,7 +5,7 @@ import urllib.parse
 import requests
 from flask import Flask, request
 from .token import TokenStore
-from .provider import OAuthType, ProviderAuthConfig
+from .provider import AuthType, ProviderAuthConfig
 
 
 __all__ = ["AuthServer", "active_server"]
@@ -82,14 +82,14 @@ class AuthServer:
 
     def _exchange_code_for_token(self, provider_id: str, code: str):
         provider = self.providers[provider_id]
-        if provider.type == OAuthType.CLIENT_SECRET:
+        if provider.type == AuthType.OAUTH_CLIENT_SECRET:
             data = {
                 "code": code,
                 "redirect_uri": provider.redirect_uri,
                 "client_id": provider.client_id,
                 "client_secret": provider.client_secret,
             }
-        elif provider.type == OAuthType.PKCE:
+        elif provider.type == AuthType.OAUTH_PKCE:
             data = {
                 "code": code,
                 "redirect_uri": provider.redirect_uri,
@@ -133,7 +133,7 @@ class AuthServer:
         self.providers[provider.id] = provider
         self.token_stores[provider.id] = token_store
 
-        if provider.type == OAuthType.CLIENT_SECRET:
+        if provider.type == AuthType.OAUTH_CLIENT_SECRET:
             params = {
                 "client_id": provider.client_id,
                 "response_type": "code",
@@ -141,7 +141,7 @@ class AuthServer:
                 "scope": provider.scope,
                 "state": state,
             }
-        elif provider.type == OAuthType.PKCE:
+        elif provider.type == AuthType.OAUTH_PKCE:
             code_challenge = self._generate_pkce_pair(provider=provider.id)
             params = {
                 "client_id": provider.client_id,

@@ -1,8 +1,8 @@
 import logging
 from threading import Event
 from .token import TokenStore
-from .server import AuthServer, active_server
-from .provider import ProviderAuthConfig
+from .server import active_server
+from .provider import ProviderAuthConfig, AuthType
 
 
 __all__ = ["RequestSigner"]
@@ -22,10 +22,11 @@ class RequestSigner:
             redirect_uri=config.redirect_uri,
             token_endpoint=config.token_endpoint,
         )
-        self.header = config.header
-        self.token_prefix = config.token_prefix
 
     def sign(self) -> dict:
+        if self.config.type == AuthType.API_KEY:
+            return {self.config.header: f"{self.config.token_prefix}{self.config.api_key}"}
+        
         access_token = self.token_store.access_token()
         if not access_token:
             token_received_event = Event()
@@ -41,8 +42,8 @@ class RequestSigner:
                 Log.error("Failed to obtain access token.")
                 raise ValueError("Failed to obtain access token.")
 
-        return {self.header: f"{self.token_prefix}{access_token}"}
+        return {self.config.header: f"{self.config.token_prefix}{access_token}"}
 
     def clear(self):
         self.token_store.delete()
-        Log.info(f"Token cleared for provider {self.provider}.")
+        Log.info(f"Token cleared for provider {self.config.id}.")

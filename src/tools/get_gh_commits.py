@@ -2,7 +2,7 @@ import os, json
 from typing import override
 from ..tool import Tool
 from .api import Provider, DataClient
-from .api.auth.provider import ProviderAuthConfig, OAuthType
+from .api.auth.provider import ProviderAuthConfig, AuthType
 
 __all__ = ["GetGitHubCommits"]
 
@@ -48,9 +48,10 @@ class GetGitHubCommits(Tool):
             name="GitHub",
             auth_config=ProviderAuthConfig(
                 id="github",
-                type=OAuthType.CLIENT_SECRET,
+                type=AuthType.OAUTH_CLIENT_SECRET,
                 client_id=os.getenv("GITHUB_CLIENT_ID"),
                 client_secret=os.getenv("GITHUB_CLIENT_SECRET"),
+                api_key=None,
                 authorization_endpoint="https://github.com/login/oauth/authorize",
                 token_endpoint="https://github.com/login/oauth/access_token",
                 scope="repo",

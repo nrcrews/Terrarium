@@ -47,6 +47,7 @@ from .tools.list_files import ListFiles
 # Remote tools
 
 from .tools.get_gh_commits import GetGitHubCommits
+from .tools.get_news import GetNews
 
 
 def local_tools() -> dict[str, Tool]:
@@ -58,4 +59,5 @@ def local_tools() -> dict[str, Tool]:
         MoveFile.name(): MoveFile(),
         ListFiles.name(): ListFiles(),
         GetGitHubCommits.name(): GetGitHubCommits(),
+        GetNews.name(): GetNews(),
     }

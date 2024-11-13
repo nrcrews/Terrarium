@@ -12,9 +12,36 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 Log = logging.getLogger("CLI")
 
+
 def main():
     announce("Welcome to Terrarium!", prefix="🌱 ")
 
+    mode = prompt_list("Select a mode:", ["Chat Mode", "Manual"])
+
+    if mode == "Chat Mode":
+        chat_mode()
+    elif mode == "Manual":
+        manual_mode()
+
+
+def chat_mode():
+    config_file = "./resources/agent_config.json"
+    agent_config = AgentConfiguration(**json.load(open(config_file)))
+
+    conductor = Conductor(client=client, config=agent_config, stream_handler=Handler())
+
+    run_config = RunConfiguration(instructions=None, parallel_tool_calls=True)
+
+    for tool in conductor.registry.available_tools:
+        conductor.registry.register_tool(name=tool)
+
+    while True:
+        text = prompt_string("You:")
+        conductor.add_message(text=text)
+        conductor.run(config=run_config)
+
+
+def manual_mode():
     custom_agent_config = prompt_confirm(
         "Would you like to use a custom agent configuration?", default=False
     )

@@ -19,7 +19,7 @@ class GetNews(Tool):
     def obj(self) -> dict:
         return {
             "name": GetNews.name(),
-            "description": "Gets news.",
+            "description": "Get news articles with descriptions and URLs.",
             "strict": True,
             "parameters": {
                 "type": "object",

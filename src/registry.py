@@ -36,7 +36,6 @@ class Registry:
 
 
 # Local tools
-
 from .tools.current_date_time import CurrentDateTime
 from .tools.read_file import ReadFile
 from .tools.delete_file import DeleteFile
@@ -45,7 +44,6 @@ from .tools.move_file import MoveFile
 from .tools.list_files import ListFiles
 
 # Remote tools
-
 from .tools.get_gh_commits import GetGitHubCommits
 from .tools.get_news import GetNews
 

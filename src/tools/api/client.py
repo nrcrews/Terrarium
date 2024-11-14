@@ -1,5 +1,8 @@
 import logging
 import requests
+import requests_cache
+from retry_requests import retry
+
 import urllib.parse
 from .provider import Provider
 from .auth.sign import RequestSigner
@@ -8,6 +11,8 @@ __all__ = ["DataClient"]
 
 Log = logging.getLogger("DataClient")
 
+cache_session = requests_cache.CachedSession('.cache', expire_after = 300)
+retry_session = retry(cache_session, retries = 3, backoff_factor = 0.2)
 
 class DataClient:
 
@@ -24,13 +29,13 @@ class DataClient:
         if self.request_signer:
             headers.update(self.request_signer.sign())
 
-        response = requests.get(url, headers=headers)
+        response = retry_session.get(url, headers=headers)
 
         if response.status_code == 403 and self.request_signer:
             Log.info("Token expired. Refreshing token.")
             self.request_signer.clear()
             headers.update(self.request_signer.sign())
-            response = requests.get(url, headers=headers)
+            response = retry_session.get(url, headers=headers)
 
         if not response.ok:
             Log.error(f"Failed to get data from {self.provider.id}")
@@ -45,13 +50,13 @@ class DataClient:
         if self.request_signer:
             headers.update(self.request_signer.sign())
 
-        response = requests.post(url, json=data, headers=headers)
+        response = retry_session.post(url, json=data, headers=headers)
 
         if response.status_code == 403 and self.request_signer:
             Log.info("Token expired. Refreshing token.")
             self.request_signer.clear()
             headers.update(self.request_signer.sign())
-            response = requests.get(url, headers=headers)
+            response = retry_session.post(url, json=data, headers=headers)
 
         if not response.ok:
             Log.error(f"Failed to get data from {self.provider.id}")
@@ -66,13 +71,13 @@ class DataClient:
         if self.request_signer:
             headers.update(self.request_signer.sign())
 
-        response = requests.put(url, json=data, headers=headers)
+        response = retry_session.put(url, json=data, headers=headers)
 
         if response.status_code == 403 and self.request_signer:
             Log.info("Token expired. Refreshing token.")
             self.request_signer.clear()
             headers.update(self.request_signer.sign())
-            response = requests.get(url, headers=headers)
+            response = retry_session.put(url, json=data, headers=headers)
 
         if not response.ok:
             Log.error(f"Failed to get data from {self.provider.id}")
@@ -88,13 +93,13 @@ class DataClient:
         if self.request_signer:
             headers.update(self.request_signer.sign())
 
-        response = requests.delete(url, headers=headers)
+        response = retry_session.delete(url, headers=headers)
 
         if response.status_code == 403 and self.request_signer:
             Log.info("Token expired. Refreshing token.")
             self.request_signer.clear()
             headers.update(self.request_signer.sign())
-            response = requests.get(url, headers=headers)
+            response = retry_session.delete(url, headers=headers)
 
         if not response.ok:
             Log.error(f"Failed to get data from {self.provider.id}")

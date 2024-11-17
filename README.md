@@ -58,7 +58,8 @@ You can pick and choose what tools your agent has access to.
 
 ### Remote
 
-**Coming soon!**
+* Get GitHub Commits
+* Search latest news
 
 ## Contributing
 
